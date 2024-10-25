@@ -1,0 +1,105 @@
+CREATE OR REPLACE PACKAGE BODY MERCHANT_PKG AS
+
+    -- Validación de correo electrónico
+    FUNCTION validate_email(email VARCHAR2) RETURN BOOLEAN IS
+    BEGIN
+        RETURN REGEXP_LIKE(email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+    END validate_email;
+
+    -- Validación de campos requeridos y formato de datos
+    PROCEDURE validate_input(p_name VARCHAR2, p_phone VARCHAR2, p_email VARCHAR2, p_status VARCHAR2) IS
+    BEGIN
+        IF p_name IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Name is required');
+        ELSIF p_status NOT IN ('Registered', 'Active', 'Inactive', 'Suspended', 'Cancelled') THEN
+            RAISE_APPLICATION_ERROR(-20002, 'Invalid status value');
+        ELSIF p_email IS NOT NULL AND NOT validate_email(p_email) THEN
+            RAISE_APPLICATION_ERROR(-20003, 'Invalid email format');
+        END IF;
+    END validate_input;
+
+    -- Función para obtener comerciante por ID con totales
+    FUNCTION get_merchant_by_id(p_merchant_id NUMBER) RETURN SYS_REFCURSOR IS
+        result_cursor SYS_REFCURSOR;
+    BEGIN
+        OPEN result_cursor FOR
+            SELECT m.name, m.department, m.city, m.phone, m.email, m.registration_date, m.status,
+                   COALESCE(SUM(e.income), 0) AS total_income,
+                   COALESCE(SUM(e.employee_count), 0) AS total_employees
+              FROM MERCHANT m
+              LEFT JOIN ESTABLISHMENT e ON m.id = e.merchant_id
+             WHERE m.id = p_merchant_id
+             GROUP BY m.name, m.department, m.city, m.phone, m.email, m.registration_date, m.status;
+        RETURN result_cursor;
+    END get_merchant_by_id;
+
+    -- Función para obtener comerciantes con filtros y paginación
+    FUNCTION get_merchants(p_name VARCHAR2 DEFAULT NULL, p_city VARCHAR2 DEFAULT NULL,
+                           p_registration_date DATE DEFAULT NULL, p_status VARCHAR2 DEFAULT NULL,
+                           p_page NUMBER DEFAULT 1, p_page_size NUMBER DEFAULT 10)
+                           RETURN SYS_REFCURSOR IS
+        result_cursor SYS_REFCURSOR;
+        v_offset NUMBER := (p_page - 1) * p_page_size;
+    BEGIN
+        OPEN result_cursor FOR
+            SELECT m.name, m.department, m.city, m.phone, m.email, m.registration_date, m.status,
+                   COALESCE(SUM(e.income), 0) AS total_income,
+                   COALESCE(SUM(e.employee_count), 0) AS total_employees
+              FROM MERCHANT m
+              LEFT JOIN ESTABLISHMENT e ON m.id = e.merchant_id
+             WHERE (p_name IS NULL OR m.name LIKE '%' || p_name || '%')
+               AND (p_city IS NULL OR m.city = p_city)
+               AND (p_registration_date IS NULL OR m.registration_date = p_registration_date)
+               AND (p_status IS NULL OR m.status = p_status)
+             GROUP BY m.name, m.department, m.city, m.phone, m.email, m.registration_date, m.status
+             OFFSET v_offset ROWS FETCH NEXT p_page_size ROWS ONLY;
+        RETURN result_cursor;
+    END get_merchants;
+
+    -- Procedimiento para crear un comerciante
+    PROCEDURE create_merchant(p_name VARCHAR2, p_department VARCHAR2, p_city VARCHAR2,
+                              p_phone VARCHAR2, p_email VARCHAR2, p_registration_date DATE,
+                              p_status VARCHAR2, out_error OUT ErrorType) IS
+    BEGIN
+        validate_input(p_name, p_phone, p_email, p_status);
+        INSERT INTO MERCHANT (name, department, city, phone, email, registration_date, status)
+        VALUES (p_name, p_department, p_city, p_phone, p_email, p_registration_date, p_status);
+        out_error.error_code := 0;
+        out_error.error_message := NULL;
+    EXCEPTION
+        WHEN OTHERS THEN
+            out_error.error_code := SQLCODE;
+            out_error.error_message := SQLERRM;
+    END create_merchant;
+
+    -- Procedimiento para actualizar un comerciante
+    PROCEDURE update_merchant(p_merchant_id NUMBER, p_name VARCHAR2, p_department VARCHAR2,
+                              p_city VARCHAR2, p_phone VARCHAR2, p_email VARCHAR2,
+                              p_registration_date DATE, p_status VARCHAR2, out_error OUT ErrorType) IS
+    BEGIN
+        validate_input(p_name, p_phone, p_email, p_status);
+        UPDATE MERCHANT
+           SET name = p_name, department = p_department, city = p_city,
+               phone = p_phone, email = p_email, registration_date = p_registration_date, status = p_status
+         WHERE id = p_merchant_id;
+        out_error.error_code := 0;
+        out_error.error_message := NULL;
+    EXCEPTION
+        WHEN OTHERS THEN
+            out_error.error_code := SQLCODE;
+            out_error.error_message := SQLERRM;
+    END update_merchant;
+
+    -- Procedimiento para eliminar un comerciante
+    PROCEDURE delete_merchant(p_merchant_id NUMBER, out_error OUT ErrorType) IS
+    BEGIN
+        DELETE FROM MERCHANT WHERE id = p_merchant_id;
+        out_error.error_code := 0;
+        out_error.error_message := NULL;
+    EXCEPTION
+        WHEN OTHERS THEN
+            out_error.error_code := SQLCODE;
+            out_error.error_message := SQLERRM;
+    END delete_merchant;
+
+END MERCHANT_PKG;

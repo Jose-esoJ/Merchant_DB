@@ -1,0 +1,32 @@
+create or replace PACKAGE MERCHANT_PKG AS
+    -- Parámetros de salida de error
+    TYPE ErrorType IS RECORD (
+        error_code NUMBER,
+        error_message VARCHAR2(255)
+    );
+
+    FUNCTION validate_email(email VARCHAR2) RETURN BOOLEAN;
+
+    PROCEDURE validate_input(p_name VARCHAR2, p_phone VARCHAR2, p_email VARCHAR2, p_status VARCHAR2);
+    -- Función para consultar comerciante por ID
+    FUNCTION get_merchant_by_id(p_merchant_id NUMBER) RETURN SYS_REFCURSOR;
+
+    -- Función para consultar comerciantes con filtros y paginación
+    FUNCTION get_merchants(p_name VARCHAR2 DEFAULT NULL, p_city VARCHAR2 DEFAULT NULL,
+                           p_registration_date DATE DEFAULT NULL, p_status VARCHAR2 DEFAULT NULL,
+                           p_page NUMBER DEFAULT 1, p_page_size NUMBER DEFAULT 10)
+                           RETURN SYS_REFCURSOR;
+
+    -- Procedimiento para crear un comerciante
+    PROCEDURE create_merchant(p_name VARCHAR2, p_department VARCHAR2, p_city VARCHAR2,
+                              p_phone VARCHAR2, p_email VARCHAR2, p_registration_date DATE,
+                              p_status VARCHAR2, out_error OUT ErrorType);
+
+    -- Procedimiento para actualizar un comerciante
+    PROCEDURE update_merchant(p_merchant_id NUMBER, p_name VARCHAR2, p_department VARCHAR2,
+                              p_city VARCHAR2, p_phone VARCHAR2, p_email VARCHAR2,
+                              p_registration_date DATE, p_status VARCHAR2, out_error OUT ErrorType);
+
+    -- Procedimiento para eliminar un comerciante
+    PROCEDURE delete_merchant(p_merchant_id NUMBER, out_error OUT ErrorType);
+END MERCHANT_PKG;

@@ -1,0 +1,30 @@
+-- Seed data for MERCHANT table
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant A', 'boyaca', 'Municipality A', '555-1010', 'merchantA@example.com', SYSDATE, 'Active');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant B', 'casanare', 'Municipality B', '555-1020', 'merchantB@example.com', SYSDATE - 5, 'Registered');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant C', 'choco', 'Municipality C', '555-1030', 'merchantC@example.com', SYSDATE - 10, 'Active');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant D', 'valle', 'Municipality D', '555-1040', 'merchantD@example.com', SYSDATE - 15, 'Inactive');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant E', 'guajira', 'Municipality E', '555-1050', 'merchantE@example.com', SYSDATE - 20, 'Suspended');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant F', 'antioquia', 'Municipality F', '555-1060', 'merchantF@example.com', SYSDATE - 25, 'Cancelled');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant G', 'vaupes', 'Municipality G', '555-1070', 'merchantG@example.com', SYSDATE - 30, 'Active');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant H', 'amazonas', 'Municipality H', '555-1080', 'merchantH@example.com', SYSDATE - 35, 'Registered');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant I', 'quindio', 'Municipality I', '555-1090', 'merchantI@example.com', SYSDATE - 40, 'Active');
+
+INSERT INTO MERCHANT (NAME, DEPARTMENT, MUNICIPALITY, PHONE, EMAIL, REGISTER_DATE, STATUS)
+VALUES ('Merchant J', 'meta', 'Municipality J', '555-1100', 'merchantJ@example.com', SYSDATE - 45, 'Inactive');
